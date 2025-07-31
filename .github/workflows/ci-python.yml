@@ -1,34 +1,50 @@
-name: CI Python Matrix
+name: CI Básico Python
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
 jobs:
-  test-matrix:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11']
+
+    defaults:
+      run:
+        working-directory: .
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v4
+    - name: Configurar Python
+      uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.11'
 
-    - run: pip install -r requirements.txt
-    - run: pytest tests/ -v
-      env:
-        # Añade esta línea: PYTHONPATH apunta al directorio raíz del repositorio.
-        # GitHub Actions clona el repo en GITHUB_WORKSPACE.
-        PYTHONPATH: ${{ github.workspace }}
+    - name: Instalar dependencias
+      run: |
+        pip install -r requirements.txt
+
+    - name: Ejecutar tests
+      run: |
+        pytest tests/ -v
+
+    - name: Ejecutar con cobertura
+      run: |
+        pytest --cov=app --cov-report=term --cov-report=html
+
+    - name: Guardar reporte
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: htmlcov/
+
 
     - name: Verificar app corriendo
       run: |
         timeout 10 python app.py &
         sleep 5
         curl -f http://localhost:5000/health
+
