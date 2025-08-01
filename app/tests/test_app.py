@@ -1,6 +1,6 @@
 import pytest
 import json
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 # Importar la factory y las extensiones
 from app.app import create_app, db, Portfolio, cache
@@ -8,7 +8,6 @@ from app.app import create_app, db, Portfolio, cache
 @pytest.fixture
 def app():
     """Crea una instancia de la aplicación para pruebas."""
-    # Usamos la factory para crear una app con la configuración de testing
     _app = create_app(testing=True)
     yield _app
 
@@ -25,11 +24,13 @@ def runner(app):
     """Fixture para ejecutar comandos de CLI de Flask."""
     return app.test_cli_runner()
 
-
-def test_home_page_from_database(client):
+# Usamos patch.object para mockear el objeto global 'cache'
+# y el decorador @patch para los tests.
+@patch('app.app.cache', new_callable=MagicMock)
+def test_home_page_from_database(mock_cache, client):
     """Test para verificar que la página se carga desde la BD la primera vez."""
     # 1. Simular que el caché está vacío
-    cache.get.return_value = None
+    mock_cache.get.return_value = None
 
     # 2. Añadir datos de prueba a la base de datos en memoria
     with client.application.app_context():
@@ -49,9 +50,11 @@ def test_home_page_from_database(client):
     assert b'Test User' in response.data
 
     # 4. Verificar que los datos se intentaron guardar en el caché
-    cache.setex.assert_called_once()
+    mock_cache.setex.assert_called_once()
 
-def test_home_page_from_cache(client):
+
+@patch('app.app.cache', new_callable=MagicMock)
+def test_home_page_from_cache(mock_cache, client):
     """Test para verificar que la página se carga desde el caché en la segunda visita."""
     # 1. Simular que el caché SÍ tiene datos
     cached_data = {
@@ -60,7 +63,7 @@ def test_home_page_from_cache(client):
         'summary': 'Cached Summary',
         'skills': ['SkillA', 'SkillB']
     }
-    cache.get.return_value = json.dumps(cached_data)
+    mock_cache.get.return_value = json.dumps(cached_data)
 
     # 2. Hacer la petición
     response = client.get('/')
@@ -69,15 +72,17 @@ def test_home_page_from_cache(client):
     assert b'Cached User' in response.data
 
     # 3. Verificar que NO se intentó acceder a la BD ni guardar en caché
-    cache.setex.assert_not_called()
+    mock_cache.setex.assert_not_called()
 
-def test_home_page_no_data(client):
+@patch('app.app.cache', new_callable=MagicMock)
+def test_home_page_no_data(mock_cache, client):
     """Test para verificar el comportamiento cuando no hay datos en la BD."""
-    cache.get.return_value = None
+    mock_cache.get.return_value = None
     response = client.get('/')
     assert response.status_code == 404
     assert b'No portfolio data found' in response.data
 
+# Note: This test does not need to mock `cache` as it's not used in the CLI command
 def test_health_check(client):
     """Test para el endpoint de health check."""
     response = client.get('/health')
@@ -85,7 +90,9 @@ def test_health_check(client):
     data = json.loads(response.data)
     assert data['status'] == 'healthy'
 
-def test_init_db_command(runner, app):
+# Note: This test does not need to mock `cache` as it's not used in the CLI command
+@patch('app.app.cache', new_callable=MagicMock)
+def test_init_db_command(mock_cache, runner, app):
     """Test para verificar que el comando 'init-db' funciona correctamente."""
     # Ejecutar el comando
     result = runner.invoke(args=['init-db'])
@@ -95,7 +102,7 @@ def test_init_db_command(runner, app):
     with app.app_context():
         item = Portfolio.query.first()
         assert item is not None
-        assert item.name == "Litocruz"
-
+        assert item.name == "Litocruz" # <-- ASISTE LA ASERSION
+        
     # Verificar que la caché fue limpiada
-    cache.delete.assert_called_once_with('portfolio_data')
+    mock_cache.delete.assert_called_once_with('portfolio_data')
