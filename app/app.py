@@ -86,9 +86,9 @@ def create_app(testing=False):
             cache.delete('portfolio_data')
             if not Portfolio.query.first():
                 sample_data = Portfolio(
-                    name="Roxs",
-                    title="Ingeniera DevOps & Cloud",
-                    summary="Apasionada por la automatización, la infraestructura como código y el despliegue continuo. Experta en crear pipelines de CI/CD robustos y escalables.",
+                    name="Litocruz",
+                    title="Ingeniero DevOps & Cloud",
+                    summary="Apasionado por la automatización, la infraestructura como código y el despliegue continuo. Experto en crear pipelines de CI/CD robustos y escalables.",
                     skills="Docker, Kubernetes, Terraform, Ansible, Jenkins, GitHub Actions, AWS, GCP"
                 )
                 db.session.add(sample_data)
