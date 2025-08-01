@@ -22,5 +22,8 @@ jobs:
     - name: Levantar servicios
       run: docker compose -f docker-compose.yml up -d
 
+    - name: Inicializar Base de Datos
+      run: docker compose exec app flask init-db
+
     - name: Verificar app
       run: curl -f http://localhost/health
