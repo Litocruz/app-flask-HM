@@ -3,6 +3,7 @@ import redis
 import json
 from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from unittest.mock import MagicMock
 
 # Inicializa las extensiones pero no las asocia con una aplicación todavía
 db = SQLAlchemy()
