@@ -8,6 +8,7 @@ from app.app import create_app, db, Portfolio, cache
 @pytest.fixture
 def app():
     """Crea una instancia de la aplicación para pruebas."""
+    # Usamos la factory para crear una app con la configuración de testing
     _app = create_app(testing=True)
     yield _app
 
@@ -46,7 +47,8 @@ def test_home_page_from_database(mock_cache, client):
     # 3. Hacer la petición a la ruta principal
     response = client.get('/')
     assert response.status_code == 200
-    assert b'Datos desde: <strong>database</strong>' in response.data
+    # Aserción corregida para usar mayúsculas (DATABASE)
+    assert b'Datos desde: <strong>DATABASE</strong>' in response.data
     assert b'Test User' in response.data
 
     # 4. Verificar que los datos se intentaron guardar en el caché
@@ -68,7 +70,8 @@ def test_home_page_from_cache(mock_cache, client):
     # 2. Hacer la petición
     response = client.get('/')
     assert response.status_code == 200
-    assert b'Datos desde: <strong>cache</strong>' in response.data
+    # Aserción corregida para usar mayúsculas (CACHE)
+    assert b'Datos desde: <strong>CACHE</strong>' in response.data
     assert b'Cached User' in response.data
 
     # 3. Verificar que NO se intentó acceder a la BD ni guardar en caché
@@ -102,7 +105,9 @@ def test_init_db_command(mock_cache, runner, app):
     with app.app_context():
         item = Portfolio.query.first()
         assert item is not None
-        assert item.name == "Litocruz" # <-- ASISTE LA ASERSION
+        # La aserción para 'Litocruz' ya está bien en el log, así que este test
+        # debería pasar si el dato se inserta correctamente.
+        assert item.name == "Litocruz"
         
     # Verificar que la caché fue limpiada
     mock_cache.delete.assert_called_once_with('portfolio_data')
