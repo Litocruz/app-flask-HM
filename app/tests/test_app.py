@@ -95,7 +95,7 @@ def test_init_db_command(runner, app):
     with app.app_context():
         item = Portfolio.query.first()
         assert item is not None
-        assert item.name == "Roxs"
+        assert item.name == "Litocruz"
 
     # Verificar que la caché fue limpiada
     cache.delete.assert_called_once_with('portfolio_data')
