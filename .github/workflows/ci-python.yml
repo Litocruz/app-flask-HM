@@ -29,10 +29,12 @@ jobs:
 
     - name: Ejecutar tests
       run: |
+        export PYTHONPATH=.
         pytest app/tests/ -v
 
     - name: Ejecutar con cobertura
       run: |
+        export PYTHONPATH=.
         pytest --cov=app --cov-report=term --cov-report=html
 
     - name: Guardar reporte
