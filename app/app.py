@@ -15,7 +15,7 @@ db_host = os.getenv("DB_HOST", "postgres")
 redis_host = os.getenv("REDIS_HOST", "redis")
 
 # Configuración de la base de datos PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Inicializa la base de datos y Redis
