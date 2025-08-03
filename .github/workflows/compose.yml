@@ -13,6 +13,14 @@ jobs:
     - name: Checkout código
       uses: actions/checkout@v4
 
+    - name: Debug secrets
+      run: |
+        echo "POSTGRES_USER is set: ${{ secrets.POSTGRES_USER != '' }}"
+        echo "POSTGRES_PASSWORD is set: ${{ secrets.POSTGRES_PASSWORD != '' }}"
+        echo "POSTGRES_DB is set: ${{ secrets.POSTGRES_DB != '' }}"
+        echo "DB_HOST is set: ${{ secrets.DB_HOST != '' }}"
+        echo "REDIS_HOST is set: ${{ secrets.REDIS_HOST != '' }}"
+
     - name: Crear archivo .env
       run: |
         echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
