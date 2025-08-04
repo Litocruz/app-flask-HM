@@ -15,14 +15,6 @@ jobs:
     - name: Checkout código
       uses: actions/checkout@v4
 
-    - name: Debug secrets
-      run: |
-        echo "POSTGRES_USER is set: ${{ secrets.POSTGRES_USER != '' }}"
-        echo "POSTGRES_PASSWORD is set: ${{ secrets.POSTGRES_PASSWORD != '' }}"
-        echo "POSTGRES_DB is set: ${{ secrets.POSTGRES_DB != '' }}"
-        echo "DB_HOST is set: ${{ secrets.DB_HOST != '' }}"
-        echo "REDIS_HOST is set: ${{ secrets.REDIS_HOST != '' }}"
-
     - name: Crear archivo .env
       run: |
         echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
@@ -40,8 +32,23 @@ jobs:
     - name: Levantar servicios
       run: docker compose -f docker-compose.yml up -d
 
+    - name: Esperar a que los servicios se estabilicen
+      run: sleep 15
+
     - name: Inicializar Base de Datos
       run: docker compose exec app flask init-db
+      continue-on-error: true
+      id: init_db
+
+    - name: Mostrar logs de los contenedores si la inicialización falló
+      if: steps.init_db.outcome == 'failure'
+      run: docker compose logs
+
+    - name: Verificar el resultado de la inicialización
+      if: steps.init_db.outcome == 'failure'
+      run: |
+        echo "La inicialización de la base de datos falló."
+        exit 1
 
     - name: Verificar app
       run: curl -f http://localhost/health
