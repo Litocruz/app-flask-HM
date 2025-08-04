@@ -4,7 +4,7 @@ import json
 from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from unittest.mock import MagicMock
-from app.simpler_logger import setup_logger
+from simpler_logger import setup_logger
 
 # Configurar el logger al inicio de la aplicación
 logger = setup_logger('flask_app_logger', 'logs/flask_app.log')
