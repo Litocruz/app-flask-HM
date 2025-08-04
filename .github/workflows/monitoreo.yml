@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml
 
-name: CI Básico Python
+name: CI Monitor Python
 
 on:
   schedule:
