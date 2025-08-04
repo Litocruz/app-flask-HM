@@ -4,6 +4,10 @@ import json
 from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from unittest.mock import MagicMock
+from app.simpler_logger import setup_logger
+
+# Configurar el logger al inicio de la aplicación
+logger = setup_logger('flask_app_logger', 'logs/flask_app.log')
 
 # Inicializa las extensiones pero no las asocia con una aplicación todavía
 db = SQLAlchemy()
@@ -56,6 +60,9 @@ def create_app(testing=False):
     def home():
         try:
             cached_portfolio = cache.get('portfolio_data')
+            # Registrar que la página principal ha sido accedida
+            logger.info("Se ha accedido a la página principal.")
+
             if cached_portfolio:
                 portfolio_data = json.loads(cached_portfolio)
                 portfolio_data['source'] = 'cache'
@@ -71,6 +78,8 @@ def create_app(testing=False):
             return render_template('index.html', portfolio=portfolio_data)
 
         except Exception as e:
+            # Registrar el error antes de devolver la respuesta
+            logger.error(f"Error al procesar la página principal: {e}")
             return render_template('error.html', message=str(e)), 500
 
     @app.route('/health')

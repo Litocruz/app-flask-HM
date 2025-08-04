@@ -12,6 +12,8 @@ services:
         condition: service_healthy
     volumes:
       - ./app:/app
+       # Logger simple
+      - ./logs:/app/logs
 
   postgres:
     image: postgres:15-alpine

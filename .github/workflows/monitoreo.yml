@@ -1,0 +1,41 @@
+# .github/workflows/ci.yml
+
+name: CI Básico Python
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'  # Cada 5 horas
+  workflow_dispatch:
+
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+  
+    - name: Monitorear la aplicación
+      run: |
+
+        # Lógica de espera robusta para el health check
+        echo "Esperando a que la aplicación esté disponible en localhost:5000..."
+        timeout=60 # Segundos de espera máxima
+        count=0
+        while [ $count -lt $timeout ]; do
+          # El -s evita que curl muestre la barra de progreso
+          if curl -s http://localhost:5000/health > /dev/null; then
+            echo "La aplicación está lista."
+            break
+          fi
+          sleep 1
+          count=$((count + 1))
+        done
+
+        # Fallar si la aplicación no respondió en el tiempo esperado
+        if [ $count -ge $timeout ]; then
+          echo "ERROR: La aplicación no respondió a tiempo."
+          kill $APP_PID || true
+          exit 1
+        fi
+
+        # Si todo está bien, simplemente imprime el estado
+        echo "La aplicación está online."
