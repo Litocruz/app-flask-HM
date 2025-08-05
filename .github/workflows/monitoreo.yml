@@ -4,7 +4,7 @@ name: CI Monitor Python
 
 on:
   schedule:
-    - cron: '0 */5 * * *'  # Cada 5 horas
+    #- cron: '0 */5 * * *'  # Cada 5 horas
   workflow_dispatch:
 
 
